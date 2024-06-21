@@ -3,3 +3,12 @@ main: net.cmr.pvppit.LobbyLib
 version: 0.0.0
 author: Cmrboy26
 api-version: '1.20'
+commands:
+ leave:
+  description: Used to leave the current minigame.
+  usage: /<command>
+  aliases: [l, hub]
+ join:
+  description: Used to join a minigame.
+  usage: /<command> <minigame>
+  aliases: [j]

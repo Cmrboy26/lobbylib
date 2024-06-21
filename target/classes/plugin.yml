@@ -1,5 +1,5 @@
 name: LobbyLib
-main: net.cmr.pvppit.LobbyLib
+main: net.cmr.lobbylib.LobbyLib
 version: 0.0.0
 author: Cmrboy26
 api-version: '1.20'

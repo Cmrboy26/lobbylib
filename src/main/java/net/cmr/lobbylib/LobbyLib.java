@@ -18,12 +18,17 @@ public class LobbyLib extends JavaPlugin implements MinigamePlugin {
     @Override
     public void onEnable() {
         getCommand("leave").setExecutor(this);
+        getLogger().info("LobbyLib is searching for compatible minigames...");
 
         // Get every plugin on the server
         minigamePlugins = new ArrayList<MinigamePlugin>();
         Plugin[] plugins = Bukkit.getPluginManager().getPlugins();
+        int count = 0;
         for (Plugin plugin : plugins) {
             // Check if the plugin is a MinigamePlugin
+            count++;
+            getLogger().info("Checking plugin: " + plugin.getName()+"... ("+count+"/"+plugins.length+")");
+
             if (plugin instanceof MinigamePlugin && !(plugin instanceof LobbyLib)) {
                 MinigamePlugin minigamePlugin = (MinigamePlugin) plugin;
                 minigamePlugins.add(minigamePlugin);
@@ -31,6 +36,7 @@ public class LobbyLib extends JavaPlugin implements MinigamePlugin {
                 getLogger().info("Found MinigamePlugin: " + minigamePlugin.getMinigameName());
             }
         }   
+        getLogger().info("LobbyLib has found "+minigamePlugins.size()+" compatible minigames.");
     }
 
     @Override
@@ -66,6 +72,9 @@ public class LobbyLib extends JavaPlugin implements MinigamePlugin {
                         if (minigamePlugin instanceof LobbyJoinableMinigame) {
                             LobbyJoinableMinigame lobbyJoinableMinigame = (LobbyJoinableMinigame) minigamePlugin;
                             if (minimizedString.equals(minigameName)) {
+                                if (isPlayerInMinigame(player)) {
+                                    kickPlayerFromMinigame(player);
+                                }
                                 lobbyJoinableMinigame.joinMinigame(player);
                                 return true;
                             }

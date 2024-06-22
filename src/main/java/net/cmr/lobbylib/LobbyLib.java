@@ -8,6 +8,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -29,6 +30,7 @@ import net.cmr.lobbylib.gui.GUI;
 public class LobbyLib extends JavaPlugin implements MinigamePlugin, Listener {
 
     List<MinigamePlugin> minigamePlugins;
+    boolean shouldUseLobbySelector;
 
     public static LobbyLib getLobbyManager() {
         Plugin plugin = Bukkit.getPluginManager().getPlugin("LobbyLib");
@@ -46,8 +48,22 @@ public class LobbyLib extends JavaPlugin implements MinigamePlugin, Listener {
     @Override
     public void onEnable() {
         getCommand("leave").setExecutor(this);
+        getCommand("join").setExecutor(this);
+        getCommand("selector").setExecutor(this);
         getServer().getPluginManager().registerEvents(this, this);
         getLogger().info("LobbyLib is searching for compatible minigames...");
+
+        FileConfiguration config = getConfig();
+        config.addDefault("use-lobby-selector", true);
+        config.options().copyDefaults(true);
+        saveConfig();
+
+        shouldUseLobbySelector = getConfig().getBoolean("use-lobby-selector");
+        if (shouldUseLobbySelector) {
+            getLogger().info("LobbyLib will use the lobby selector.");
+        } else {
+            getLogger().info("LobbyLib will not use the lobby selector.");
+        }
 
         // Get every plugin on the server
         minigamePlugins = new ArrayList<MinigamePlugin>();
@@ -119,7 +135,7 @@ public class LobbyLib extends JavaPlugin implements MinigamePlugin, Listener {
         if (command.getName().equalsIgnoreCase("selector")) {
             if (sender instanceof Player) {
                 Player player = (Player) sender;
-                // Open up the minigame selector GUI
+                openSelectorInventory(player);
                 return true;
             } else {
                 sender.sendMessage(ChatColor.RED+"You must be a player to use this command.");
@@ -190,18 +206,22 @@ public class LobbyLib extends JavaPlugin implements MinigamePlugin, Listener {
 
     public void onPlayerLeaveMinigame(Player player, MinigamePlugin plugin) {
         // Give the player a compass
-        getLogger().info("\""+player.getName()+"\" has left \""+plugin.getMinigameName()+"\".");
-        ItemStack compass = new ItemStack(LOBBY_SELECTOR_MATERIAL);
-        ItemMeta meta = compass.getItemMeta();
-        meta.setDisplayName(LOBBY_SELECTOR_NAME);
-        compass.setItemMeta(meta);
-        player.getInventory().setItem(4, compass);
+        if (shouldUseLobbySelector) {
+            getLogger().info("\""+player.getName()+"\" has left \""+plugin.getMinigameName()+"\".");
+            ItemStack compass = new ItemStack(LOBBY_SELECTOR_MATERIAL);
+            ItemMeta meta = compass.getItemMeta();
+            meta.setDisplayName(LOBBY_SELECTOR_NAME);
+            compass.setItemMeta(meta);
+            player.getInventory().setItem(4, compass);
+        }
     }
 
     public void onPlayerJoinMinigame(Player player, MinigamePlugin plugin) {
         // Remove the compass from the player
-        getLogger().info("\""+player.getName()+"\" joined \""+plugin.getMinigameName()+"\".");
-        player.getInventory().setItem(4, null);
+        if (shouldUseLobbySelector) {
+            getLogger().info("\""+player.getName()+"\" joined \""+plugin.getMinigameName()+"\".");
+            player.getInventory().setItem(4, null);
+        }
     }
 
     // Minigame Selector
@@ -254,30 +274,22 @@ public class LobbyLib extends JavaPlugin implements MinigamePlugin, Listener {
 
     private boolean isLobbySelector(ItemStack item) {
         if (item == null) {
-            getLogger().warning("Item is null");
             return false;
         }
         if (item.getType() != LOBBY_SELECTOR_MATERIAL) {
-            getLogger().warning("Item is not a compass");
             return false;
         }
         ItemMeta meta = item.getItemMeta();
         if (meta == null) {
-            getLogger().warning("Item has no meta data");
             return false;
         }
 
         String itemName = meta.getDisplayName();
         if (itemName == null) {
-            getLogger().warning("Item has no display name");
             return false;
         }
 
         boolean equals = meta.getDisplayName().equals(LOBBY_SELECTOR_NAME);
-        getLogger().info("Item is a compass with display name \""+itemName+"\". Is it a lobby selector? "+equals);
-        if (!equals) {
-            getLogger().warning("Item is not a lobby selector:"+meta.getDisplayName()+"|"+LOBBY_SELECTOR_NAME);
-        }
         return equals;
     }
 
@@ -308,7 +320,7 @@ public class LobbyLib extends JavaPlugin implements MinigamePlugin, Listener {
                 Material minigameIcon = lobbyJoinableMinigame.getMinigameIcon();
 
                 List<String> lore = new ArrayList<String>();
-                lore.add(lobbyJoinableMinigame.getMinigameDescription());
+                lore.add(ChatColor.RESET+lobbyJoinableMinigame.getMinigameDescription());
                 if (!canJoin) {
                     if (!playerHasPermission) {
                         lore.add(ChatColor.RED+"You do not have permission to join this minigame.");

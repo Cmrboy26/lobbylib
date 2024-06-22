@@ -22,7 +22,9 @@ public interface LobbyJoinableMinigame extends MinigamePlugin {
     /**
      * @return the color of the minigame title to be used in the lobby compass.
      */
-    public ChatColor[] getMinigameTitleColor();
+    public default ChatColor[] getMinigameTitleColor() {
+        return new ChatColor[] {};
+    }
 
     /**
      * @return a description that will be displayed in the lobby compass (if enabled).

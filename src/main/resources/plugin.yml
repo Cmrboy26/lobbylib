@@ -12,3 +12,7 @@ commands:
   description: Used to join a minigame.
   usage: /<command> <minigame>
   aliases: [j, play]
+ selector:
+  description: Used to open the minigame selector.
+  usage: /<command> <
+  aliases: [s, games]

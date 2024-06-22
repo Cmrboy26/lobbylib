@@ -24,6 +24,7 @@ public interface MinigamePlugin {
     /**
      * Returns the name of the minigame.
      * Will be used in the /join command (spaces will be replaced with "_" and it will be case-insensitive)
+     * and in the minigame selection GUI, so make sure it is human readable.
      */
     public String getMinigameName();
 

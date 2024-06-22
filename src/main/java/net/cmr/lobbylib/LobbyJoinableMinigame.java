@@ -1,5 +1,6 @@
 package net.cmr.lobbylib;
 
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
@@ -17,6 +18,11 @@ public interface LobbyJoinableMinigame extends MinigamePlugin {
      * @return true if the player is in the minigame, false otherwise.
      */
     public Material getMinigameIcon();
+
+    /**
+     * @return the color of the minigame icon to be used in the lobby compass.
+     */
+    public ChatColor[] getMinigameIconColor();
 
     /**
      * @return a description that will be displayed in the lobby compass (if enabled).

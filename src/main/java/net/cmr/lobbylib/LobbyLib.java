@@ -301,7 +301,7 @@ public class LobbyLib extends JavaPlugin implements MinigamePlugin, Listener {
 
                 String minigameName = lobbyJoinableMinigame.getMinigameName();
                 String colors = "";
-                for (ChatColor color : lobbyJoinableMinigame.getMinigameIconColor()) {
+                for (ChatColor color : lobbyJoinableMinigame.getMinigameTitleColor()) {
                     colors += color.toString();
                 }
 

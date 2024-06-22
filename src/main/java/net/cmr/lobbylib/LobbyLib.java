@@ -5,15 +5,27 @@ import java.util.List;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class LobbyLib extends JavaPlugin implements MinigamePlugin {
 
     List<MinigamePlugin> minigamePlugins;
+
+    private static LobbyLib lobbyManager;
+    public static LobbyLib getLobbyManager() {
+        return lobbyManager;
+    }
+
+    private LobbyLib() {
+        lobbyManager = this;
+    }
 
     @Override
     public void onEnable() {
@@ -23,12 +35,8 @@ public class LobbyLib extends JavaPlugin implements MinigamePlugin {
         // Get every plugin on the server
         minigamePlugins = new ArrayList<MinigamePlugin>();
         Plugin[] plugins = Bukkit.getPluginManager().getPlugins();
-        int count = 0;
         for (Plugin plugin : plugins) {
             // Check if the plugin is a MinigamePlugin
-            count++;
-            getLogger().info("Checking plugin: " + plugin.getName()+"... ("+count+"/"+plugins.length+")");
-
             if (plugin instanceof MinigamePlugin && !(plugin instanceof LobbyLib)) {
                 MinigamePlugin minigamePlugin = (MinigamePlugin) plugin;
                 minigamePlugins.add(minigamePlugin);
@@ -41,6 +49,11 @@ public class LobbyLib extends JavaPlugin implements MinigamePlugin {
 
     @Override
     public void onDisable() {
+        getLogger().info("Removing all players from minigames...");
+        List<Player> playersSnapshot = new ArrayList<Player>(Bukkit.getOnlinePlayers());
+        for (Player player : playersSnapshot) {
+            kickPlayerFromMinigame(player);
+        }
         minigamePlugins.clear();
     }
 
@@ -134,6 +147,20 @@ public class LobbyLib extends JavaPlugin implements MinigamePlugin {
     @Override
     public String getMinigameName() {
         return "Lobby";
+    }
+
+    public void onPlayerLeaveMinigame(Player player, MinigamePlugin plugin) {
+        // Give the player a compass
+        ItemStack compass = new ItemStack(Material.COMPASS);
+        ItemMeta meta = compass.getItemMeta();
+        meta.setDisplayName(ChatColor.GREEN+"Minigame Menu");
+        compass.setItemMeta(meta);
+        player.getInventory().setItem(4, compass);
+    }
+
+    public void onPlayerJoinMinigame(Player player, MinigamePlugin plugin) {
+        // Remove the compass from the player
+        player.getInventory().setItem(4, null);
     }
 
 }

@@ -17,6 +17,8 @@ public interface MinigamePlugin {
     /**
      * Whenever LobbyLib wants to kick a player from the minigame at any time (i.e. with /leave, /join, etc.),
      * this method will be called. Thread safety is not guaranteed, so you should handle that yourself.
+     * In addition, the call may be made after onDisable() has been called, so keep that in mind if you're setting
+     * values to null in that method.
      */
     public void kickPlayerFromMinigame(Player player);
     /**

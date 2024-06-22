@@ -18,13 +18,17 @@ public class LobbyLib extends JavaPlugin implements MinigamePlugin {
 
     List<MinigamePlugin> minigamePlugins;
 
-    private static LobbyLib lobbyManager;
     public static LobbyLib getLobbyManager() {
-        return lobbyManager;
+        Plugin plugin = Bukkit.getPluginManager().getPlugin("LobbyLib");
+        if (plugin instanceof LobbyLib) {
+            return (LobbyLib) plugin;
+        }
+        return null;
     }
 
-    private LobbyLib() {
-        lobbyManager = this;
+    @Deprecated
+    public LobbyLib() {
+        super();
     }
 
     @Override
@@ -151,6 +155,7 @@ public class LobbyLib extends JavaPlugin implements MinigamePlugin {
 
     public void onPlayerLeaveMinigame(Player player, MinigamePlugin plugin) {
         // Give the player a compass
+        getLogger().info("\""+player.getName()+"\" has left \""+plugin.getMinigameName()+"\".");
         ItemStack compass = new ItemStack(Material.COMPASS);
         ItemMeta meta = compass.getItemMeta();
         meta.setDisplayName(ChatColor.GREEN+"Minigame Menu");
@@ -160,6 +165,7 @@ public class LobbyLib extends JavaPlugin implements MinigamePlugin {
 
     public void onPlayerJoinMinigame(Player player, MinigamePlugin plugin) {
         // Remove the compass from the player
+        getLogger().info("\""+player.getName()+"\" joined \""+plugin.getMinigameName()+"\".");
         player.getInventory().setItem(4, null);
     }
 

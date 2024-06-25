@@ -7,7 +7,7 @@ commands:
  leave:
   description: Used to leave the current minigame.
   usage: /<command>
-  aliases: [l, hub]
+  aliases: [l, hub, spawn]
  join:
   description: Used to join a minigame.
   usage: /<command> <minigame>

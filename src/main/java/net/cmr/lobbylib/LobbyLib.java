@@ -1,6 +1,7 @@
 package net.cmr.lobbylib;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.bukkit.Bukkit;
@@ -18,9 +19,10 @@ import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -32,6 +34,8 @@ public class LobbyLib extends JavaPlugin implements MinigamePlugin, Listener {
 
     List<MinigamePlugin> minigamePlugins;
     boolean shouldUseLobbySelector;
+    HashMap<Player, ItemStack[]> playerInventory = new HashMap<Player, ItemStack[]>();
+    HashMap<Player, ItemStack[]> playerEnderchest = new HashMap<Player, ItemStack[]>();
 
     public static LobbyLib getLobbyManager() {
         Plugin plugin = Bukkit.getPluginManager().getPlugin("LobbyLib");
@@ -206,6 +210,16 @@ public class LobbyLib extends JavaPlugin implements MinigamePlugin, Listener {
     }
 
     public void onPlayerLeaveMinigame(Player player, MinigamePlugin plugin) {
+        // Load the player's inventory
+        ItemStack[] inventory = playerInventory.get(player);
+        ItemStack[] enderchest = playerEnderchest.get(player);
+        if (inventory != null) {
+            player.getInventory().setContents(inventory);
+        }
+        if (enderchest != null) {
+            player.getEnderChest().setContents(enderchest);
+        }
+
         // Give the player a compass
         if (shouldUseLobbySelector) {
             getLogger().info("\""+player.getName()+"\" has left \""+plugin.getMinigameName()+"\".");
@@ -218,11 +232,24 @@ public class LobbyLib extends JavaPlugin implements MinigamePlugin, Listener {
     }
 
     public void onPlayerJoinMinigame(Player player, MinigamePlugin plugin) {
+        // Ensure that the player is not in a game before joining
+        if (isPlayerInMinigame(player)) {
+            kickPlayerFromMinigame(player);
+        }
+
         // Remove the compass from the player
         if (shouldUseLobbySelector) {
             getLogger().info("\""+player.getName()+"\" joined \""+plugin.getMinigameName()+"\".");
-            player.getInventory().setItem(4, null);
+            if (isLobbySelector(player.getInventory().getItem(4))) {
+                player.getInventory().setItem(4, null);
+            }
         }
+
+        // Save the player's inventory
+        ItemStack[] inventory = player.getInventory().getContents();
+        ItemStack[] enderchest = player.getEnderChest().getContents();
+        playerInventory.put(player, inventory);
+        playerEnderchest.put(player, enderchest);
     }
 
     // Minigame Selector
@@ -236,6 +263,8 @@ public class LobbyLib extends JavaPlugin implements MinigamePlugin, Listener {
         if (isPlayerInMinigame(player)) {
             kickPlayerFromMinigame(player);
         }
+        playerInventory.remove(player);
+        playerEnderchest.remove(player);
     }
 
     @EventHandler

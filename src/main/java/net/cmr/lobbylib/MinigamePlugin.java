@@ -28,4 +28,31 @@ public interface MinigamePlugin {
      */
     public String getMinigameName();
 
+    /**
+     * Whenever a player leaves the minigame, this method should be called.
+     * When creating a MinigamePlugin, you should call this whenever the player leaves the minigame,
+     * (whether it's leaving a queue or a race through a portal, sign, etc.).
+     * If your minigame has a "leavePlayer", "removePlayer", or "kickPlayer" method, you should call this method at the END of it.
+     */
+    public default void onPlayerLeaveMinigame(Player player) {
+        LobbyLib plugin = LobbyLib.getLobbyManager();
+        if (plugin != null) {
+            plugin.onPlayerLeaveMinigame(player, this);
+        }
+    }
+
+    /**
+     * Whenever a player joins the minigame, this method should be called.
+     * When creating a MinigamePlugin, you should call this whenever the player enters the minigame,
+     * (whether it's entering a queue or a race through a portal, sign, etc.)
+     * If your minigame has a "joinPlayer", "addPlayer", "queuePlayer", or "acceptPlayer" method, 
+     * you should call this method at the BEGINNING of it (as it may remove items).
+     */
+    public default void onPlayerJoinMinigame(Player player) {
+        LobbyLib plugin = LobbyLib.getLobbyManager();
+        if (plugin != null) {
+            plugin.onPlayerJoinMinigame(player, this);
+        }
+    }
+
 }

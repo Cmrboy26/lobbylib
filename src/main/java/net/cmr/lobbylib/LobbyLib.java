@@ -197,6 +197,7 @@ public class LobbyLib extends JavaPlugin implements MinigamePlugin, Listener {
     @Override
     public void kickPlayerFromMinigame(Player player) {
         for (MinigamePlugin minigamePlugin : minigamePlugins) {
+            getLogger().info("Checking if \""+player.getName()+"\" is in \""+minigamePlugin.getMinigameName()+"\"...");
             if (minigamePlugin.isPlayerInMinigame(player)) {
                 minigamePlugin.kickPlayerFromMinigame(player);
                 return;
@@ -233,9 +234,7 @@ public class LobbyLib extends JavaPlugin implements MinigamePlugin, Listener {
 
     public void onPlayerJoinMinigame(Player player, MinigamePlugin plugin) {
         // Ensure that the player is not in a game before joining
-        if (isPlayerInMinigame(player)) {
-            kickPlayerFromMinigame(player);
-        }
+        kickPlayerFromMinigame(player);
 
         // Remove the compass from the player
         if (shouldUseLobbySelector) {
